@@ -72,13 +72,18 @@ module.exports = function(app) {
         message: 'Invalid e-mail address'
       });
     }
-    unloqApi.authenticate(email).on('pending', function OnPending() {
+    unloqApi.authenticate({
+      email: email
+    }).on('pending', function OnPending() {
       console.log('Notification reached user, awaiting input.');
     }).then(function(accessToken) {
       console.log('User accepted login, will create session.');
       // We need to generate a session ID.
       var sessionId = req.session.id;
-      unloqApi.confirmToken(accessToken, sessionId, SESSION_LIFETIME).then(function(userData) {
+      unloqApi.tokenData(accessToken, {
+        session_id: sessionId,
+        duration: SESSION_LIFETIME
+      }).then(function(userData) {
         console.log('User just logged in.');
         console.log(userData);
         req.session.user = {
